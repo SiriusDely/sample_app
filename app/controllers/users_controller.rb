@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+  before_filter :is_signed_in,    only: [:new, :create]
   before_filter :signed_in_user,  only: [:index, :edit, :update, :destroy]
   before_filter :correct_user,    only: [:edit, :update]
   before_filter :admin_user,      only: :destroy
@@ -46,6 +47,12 @@ class UsersController < ApplicationController
   end
 
   private
+
+  def is_signed_in
+    if current_user
+      redirect_to current_user
+    end 
+  end
 
   def signed_in_user
     unless signed_in?

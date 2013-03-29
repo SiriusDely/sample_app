@@ -42,6 +42,8 @@ describe "Authentication" do
       describe "followed by signout" do
         before { click_link "Sign out" }
         it { should have_link('Sign in') }
+        it { should_not have_link('Profile') }
+        it { should_not have_link('Settings') }
       end
     end
 
@@ -72,10 +74,8 @@ describe "Authentication" do
 
       describe "when attempting to visit a protected page" do
         before do
+          sign_in user
           visit edit_user_path(user)
-          fill_in "Email",    with: user.email
-          fill_in "Password", with: user.password
-          click_button "Sign in"
         end
 
         describe "after signing in" do
@@ -83,12 +83,27 @@ describe "Authentication" do
             page.should have_selector('title', text: 'Edit user')
           end
         end
+
+        describe "when signing in again" do
+          before do
+            delete signout_path
+            visit signin_path
+            sign_in user
+          end
+
+          it "should render the default profile page" do
+            page.should have_selector('title', text: user.name)
+          end
+        end
       end
 
-      describe "submitting to the update action" do
-        before { put user_path(user) }
+      describe "when attempting to visit signup page" do
+        before do
+          sign_in user
+          visit signup_path
+        end
 
-        specify { response.should redirect_to(signin_path) }
+        it { should have_selector 'title', text: user.name };
       end
     end
 
